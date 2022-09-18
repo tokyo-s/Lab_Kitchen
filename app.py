@@ -1,23 +1,23 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 import uvicorn
 import threading
 import logging
-import requests
 
-from .Kitchen import Kitchen
+from Kitchen import Kitchen
 
 app = FastAPI()
 logger = logging.getLogger(__name__)
 
-DINNING_HALL_URL = "http://dinning-hall-container:8001"
+kitchen = None
 
 
 @app.post("/order")
-def read_root():
+async def get_order(request: Request):
     logger.warning('Order received by Kitchen')
-    logger.warning('Sending foot to dining hall')
-    r = requests.post(f'{DINNING_HALL_URL}/distribution')
-    logging.info(f"Response status code: " + str(r.status_code))
+
+    order = await request.json()
+    kitchen.save_order(order)
+
     return {"Hello": "World"}
 
 

@@ -1,4 +1,17 @@
-from .config import *
+from Cook import Cook
+from Order import Order
+from config import *
+import threading
+import logging
+import requests
+
+logger = logging.getLogger(__name__)
+DINNING_HALL_URL = "http://dinning-hall-container:8001"
+
+
+def send_order_for_distribution(order):
+    logger.warning('Sending food to dining hall')
+    requests.post(f'{DINNING_HALL_URL}/distribution', json=order.__dict__)
 
 
 class Kitchen:
@@ -6,6 +19,30 @@ class Kitchen:
         self.nr_cooks = nr_cooks
         self.nr_ovens = nr_ovens
         self.nr_stoves = nr_stoves
+        self.order_list = []  # TODO make priority Q later
+
+        self.cooks = [Cook(cook_id) for cook_id in range(self.nr_cooks)]
+        # TODO create Cooks with different superpowers and not same
 
     def run_test(self):
-        pass
+        for cook in self.cooks:
+            threading.Thread(target=cook.start_cooking, args=(self.order_list,)).start()
+
+        while True:
+            for order in self.order_list:
+                if order.is_finished():
+                    send_order_for_distribution(order)
+                    self.order_list.remove(order)
+
+    def save_order(self, order):
+
+        order_id = order['order_id']
+        table_id = order['table_id']
+        waiter_id = order['waiter_id']
+        items = order['items']
+        priority = order['priority']
+        max_wait = order['max_wait']
+        pick_up_time = order['pick_up_time']
+
+        order = Order(order_id, table_id, waiter_id, items, priority, max_wait, pick_up_time)
+        self.order_list.append(order)
