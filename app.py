@@ -1,30 +1,27 @@
-from fastapi import FastAPI, Request
-import uvicorn
+from flask import Flask, request
 import threading
 import logging
 
 from Kitchen import Kitchen
 
-app = FastAPI()
+app = Flask(__name__)
 logger = logging.getLogger(__name__)
 
 kitchen = None
 
-
-@app.post("/order")
-async def get_order(request: Request):
+@app.route('/order', methods=['POST'])
+def get_order():
     logger.warning('Order received by Kitchen')
-
-    order = await request.json()
+    order = request.json
     kitchen.save_order(order)
 
-    return {"Hello": "World"}
+    return {}
 
 
 if __name__ == '__main__':
     threading.Thread(
         target=lambda: {
-            uvicorn.run(app, host='0.0.0.0', port=8000)
+            app.run(debug=True, use_reloader=False, host="0.0.0.0", port=8000)
         }
     ).start()
 
