@@ -10,6 +10,8 @@ class Order:
 
         self.finished = False
         self.taken = False
+        self.cooking_time = 0
+        self.cooking_details = []
 
     def is_finished(self):
         return self.finished

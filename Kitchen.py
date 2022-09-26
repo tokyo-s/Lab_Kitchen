@@ -21,7 +21,7 @@ class Kitchen:
         self.nr_stoves = nr_stoves
         self.order_list = []  # TODO make priority Q later
 
-        self.cooks = [Cook(cook_id) for cook_id in range(self.nr_cooks)]
+        self.cooks = [Cook(cook_id, cook['Rank'], cook['Proficiency']) for cook_id, cook in enumerate(COOKS)]
         # TODO create Cooks with different superpowers and not same
 
     def run_test(self):
