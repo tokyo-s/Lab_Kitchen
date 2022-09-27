@@ -12,8 +12,6 @@ class Order:
         self.max_wait = max_wait
         self.pick_up_time = pick_up_time
 
-        self.finished = False
-        self.taken = False
         self.cooking_time = 0
         self.cooking_details = []
         self.food_items = [Food(self.order_id, item_id, MENU[item_id-1]['preparation-time'],

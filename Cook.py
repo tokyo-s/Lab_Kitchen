@@ -14,21 +14,26 @@ class Cook:
     def start_cooking(self, order_list):
 
         while True:
-            for order in order_list:
-                if not order.taken:
-                    order.taken = True
+            for _, order in order_list:
+                if not order.is_finished():
                     for food_idx, food in enumerate(order.food_items):
-                        food.lock.aquire()
-                        if not food.is_finished():
-                            if food.complexity <= self.rank:
-                                logger.warning(f'Cook {self.cook_id} started preparing food {food_idx}')
-                                time.sleep(food.preparation_time * TIME_UNIT / 1000)
-                                order.nr_foods_prepared += 1
-                                logger.warning(f'Cook {self.cook_id} prepared food {food_idx}, order ready on '
-                                               f'{int(order.nr_foods_prepared/len(order.items)*100)}%')
-                            else:
-                                logger.warning(f"Cook's {self.cook_id} rank lower than food {food_idx} complexity, "
-                                               f'food not taken by the cook')
-                        food.lock.release()
-                    order.finished = True
-                    order.cooking_time = food.preparation_time
+                        if not food.is_taken():
+                            food.lock.acquire()
+                            if not food.is_finished():
+                                if food.complexity <= self.rank:
+                                    food.taken()
+                                    logger.warning(f'Cook {self.cook_id} started preparing food {food_idx} from {food.order_id}')
+                                    time.sleep(food.preparation_time * TIME_UNIT / 1000)
+                                    food.finished()
+                                    order.cooking_details.append({'food_id': food.item_id, 'cook_id': self.cook_id})
+                                    order.nr_foods_prepared += 1
+                                    logger.warning(f'Cook {self.cook_id} prepared food {food_idx}, order {food.order_id} '
+                                                   f'ready on {int(order.nr_foods_prepared/len(order.items)*100)}%')
+                                else:
+                                    logger.warning(f"Cook {self.cook_id}'s rank {self.rank} lower than food {food_idx} "
+                                                   f"from {food.order_id} complexity {food.complexity}, "
+                                                   f'food not taken by the cook')
+                            food.lock.release()
+                    # order.cooking_time = food.preparation_time
+
+            time.sleep(0.001)

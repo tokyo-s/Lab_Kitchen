@@ -13,3 +13,12 @@ class Food:
 
     def is_finished(self):
         return self.status == 'finished'
+
+    def finished(self):
+        self.status = 'finished'
+
+    def taken(self):
+        self.status = 'taken'
+
+    def is_taken(self):
+        return self.status == 'taken'

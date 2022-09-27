@@ -12,7 +12,10 @@ DINNING_HALL_URL = "http://dinning-hall-container:8001"
 
 def send_order_for_distribution(order):
     logger.warning('Sending food to dining hall')
-    requests.post(f'{DINNING_HALL_URL}/distribution', json=order.__dict__)
+    order_json = dict(order.__dict__)
+    del order_json['food_items']
+    del order_json['nr_foods_prepared']
+    requests.post(f'{DINNING_HALL_URL}/distribution', json=order_json)
 
 
 class Kitchen:
@@ -29,14 +32,14 @@ class Kitchen:
     def run_test(self):
         for cook in self.cooks:
             # also each cook receives number of threads equal to their proficiency
-            for skill in range(len(cook.proficiency)):
+            for _ in range(cook.proficiency):
                 threading.Thread(target=cook.start_cooking, args=(self.order_list.queue,)).start()
 
         while True:
-            for order in self.order_list.queue:
+            for priority, order in self.order_list.queue:
                 if order.is_finished():
                     send_order_for_distribution(order)
-                    self.order_list.remove(order)
+                    self.order_list.queue.remove((priority, order))
 
     def save_order(self, order):
 
@@ -49,5 +52,6 @@ class Kitchen:
         pick_up_time = order['pick_up_time']
 
         order = Order(order_id, table_id, waiter_id, items, int(priority), int(max_wait), float(pick_up_time))
+        logger.warning(f'Order {order_id} put on order list')
         self.order_list.put((-order.priority, order))
         # self.order_list.append(order)
