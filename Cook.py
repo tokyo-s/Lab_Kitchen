@@ -34,6 +34,5 @@ class Cook:
                                                    f"from {food.order_id} complexity {food.complexity}, "
                                                    f'food not taken by the cook')
                             food.lock.release()
-                    # order.cooking_time = food.preparation_time
 
             time.sleep(0.001)
