@@ -2,11 +2,12 @@ import threading
 
 
 class Food:
-    def __init__(self, order_id, item_id, preparation_time, complexity, cook_id=None, status='not taken'):
+    def __init__(self, order_id, item_id, preparation_time, complexity, cooking_apparatus, cook_id=None, status='not taken'):
         self.order_id = order_id
         self.item_id = item_id
         self.preparation_time = preparation_time
         self.complexity = complexity
+        self.cooking_apparatus = cooking_apparatus
         self.cook_id = cook_id
         self.status = status
         self.lock = threading.Lock()

@@ -6,19 +6,27 @@ TIME_UNIT = 300
 COOKS = [
         {
             'Rank': 3,
-            'Proficiency': 4
+            'Proficiency': 4,
+            'name': 'Gordon Ramsay',
+            'catch-phrase': 'What are you? An idiot sandwich.'
         },
         {
             'Rank': 2,
-            'Proficiency': 3
+            'Proficiency': 3,
+            'name': 'Victor Barinov',
+            'catch-phrase': 'What are you? An Oguzok.'
         },
         {
             'Rank': 2,
-            'Proficiency': 2
+            'Proficiency': 2,
+            'name': 'Ekaterina Victorovna',
+            'catch-phrase': 'What are you? A molecular idiot sandwich.'
         },
         {
             'Rank': 1,
-            'Proficiency': 2
+            'Proficiency': 2,
+            'name': 'Maksim Lavrov',
+            'catch-phrase': "Hello I'm Maks"
         },
         ]
 

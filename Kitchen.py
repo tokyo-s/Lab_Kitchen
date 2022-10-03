@@ -5,6 +5,8 @@ import threading
 import logging
 import requests
 from queue import PriorityQueue
+from Apparatus import *
+import time
 
 logger = logging.getLogger(__name__)
 DINNING_HALL_URL = "http://dinning-hall-container:8001"
@@ -12,9 +14,10 @@ DINNING_HALL_URL = "http://dinning-hall-container:8001"
 
 def send_order_for_distribution(order):
     logger.warning('Sending food to dining hall')
-    order_json = dict(order.__dict__)
+    order_json = order.__dict__
     del order_json['food_items']
     del order_json['nr_foods_prepared']
+    del order_json['register_order_time']
     requests.post(f'{DINNING_HALL_URL}/distribution', json=order_json)
 
 
@@ -25,7 +28,10 @@ class Kitchen:
         self.nr_stoves = nr_stoves
         self.order_list = PriorityQueue()
 
-        self.cooks = [Cook(cook_id, cook['Rank'], cook['Proficiency']) for cook_id, cook in enumerate(COOKS)]
+        self.cooks = [Cook(cook_id, cook['Rank'], cook['Proficiency'], cook['name'], cook['catch-phrase'], self)
+                      for cook_id, cook in enumerate(COOKS)]
+        self.stoves = [Stove(stove_id) for stove_id in range(nr_stoves)]
+        self.ovens = [Oven(oven_id) for oven_id in range(nr_ovens)]
 
         # self.order_list_lock = threading.Lock()
 
@@ -38,8 +44,10 @@ class Kitchen:
         while True:
             for priority, order in self.order_list.queue:
                 if order.is_finished():
-                    send_order_for_distribution(order)
+                    cooking_end_time = int(time.time())
+                    order.cooking_time = cooking_end_time - order.register_order_time
                     self.order_list.queue.remove((priority, order))
+                    send_order_for_distribution(order)
 
     def save_order(self, order):
 
@@ -50,8 +58,21 @@ class Kitchen:
         priority = order['priority']
         max_wait = order['max_wait']
         pick_up_time = order['pick_up_time']
+        register_order_time = int(time.time())
 
-        order = Order(order_id, table_id, waiter_id, items, int(priority), int(max_wait), float(pick_up_time))
+        order = Order(order_id, table_id, waiter_id, items, int(priority), int(max_wait), pick_up_time,
+                      register_order_time)
         logger.warning(f'Order {order_id} put on order list')
         self.order_list.put((-order.priority, order))
         # self.order_list.append(order)
+
+    def get_available_apparatus(self, name):
+        if name == 'oven':
+            for oven in self.ovens:
+                if oven.is_available:
+                    return oven
+        elif name == 'stove':
+            for stove in self.stoves:
+                if stove.is_available:
+                    return stove
+        return None
