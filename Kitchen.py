@@ -64,15 +64,22 @@ class Kitchen:
                       register_order_time)
         logger.warning(f'Order {order_id} put on order list')
         self.order_list.put((-order.priority, order))
-        # self.order_list.append(order)
 
     def get_available_apparatus(self, name):
         if name == 'oven':
             for oven in self.ovens:
+                oven.lock.acquire()
                 if oven.is_available:
+                    oven.busy()
+                    oven.lock.release()
                     return oven
+                oven.lock.release()
         elif name == 'stove':
             for stove in self.stoves:
+                stove.lock.acquire()
                 if stove.is_available:
+                    stove.busy()
+                    stove.lock.release()
                     return stove
+                stove.lock.release()
         return None

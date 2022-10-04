@@ -31,19 +31,21 @@ class Cook:
                                             food.lock.release()
                                             continue
                                     food.taken()
-                                    logger.warning(f'Cook {self.name} started preparing food {food_idx} from {food.order_id}')
                                     order.cooking_details.append({'food_id': food.item_id, 'cook_id': self.cook_id})
 
                                     if apparatus:
-                                        apparatus.prepare_food(food)
+                                        apparatus.use(food)
+                                        food.finished()
                                     else:
+                                        logger.warning(
+                                            f'Cook {self.cook_id} started preparing food {food_idx} from {food.order_id}')
                                         time.sleep(food.preparation_time * TIME_UNIT / 1000)
                                         food.finished()
                                         order.nr_foods_prepared += 1
-                                        logger.warning(f'Cook {self.name} prepared food {food_idx}, order {food.order_id} '
+                                        logger.warning(f'Cook {self.cook_id} prepared food {food_idx}, order {food.order_id} '
                                                        f'ready on {int(order.nr_foods_prepared/len(order.items)*100)}%')
                                 else:
-                                    logger.warning(f"Cook {self.name}'s rank {self.rank} lower than food {food_idx} "
+                                    logger.warning(f"Cook {self.cook_id}'s rank {self.rank} lower than food {food_idx} "
                                                    f"from {food.order_id} complexity {food.complexity}, "
                                                    f'food not taken by the cook')
                             food.lock.release()
