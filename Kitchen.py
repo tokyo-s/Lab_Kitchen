@@ -16,7 +16,6 @@ def send_order_for_distribution(order):
     logger.warning('Sending food to dining hall')
     order_json = order.__dict__
     del order_json['food_items']
-    del order_json['nr_foods_prepared']
     del order_json['register_order_time']
     requests.post(f'{DINNING_HALL_URL}/distribution', json=order_json)
 
@@ -68,18 +67,14 @@ class Kitchen:
     def get_available_apparatus(self, name):
         if name == 'oven':
             for oven in self.ovens:
-                oven.lock.acquire()
                 if oven.is_available:
+                    oven.lock.acquire()
                     oven.busy()
-                    oven.lock.release()
                     return oven
-                oven.lock.release()
         elif name == 'stove':
             for stove in self.stoves:
-                stove.lock.acquire()
                 if stove.is_available:
+                    stove.lock.acquire()
                     stove.busy()
-                    stove.lock.release()
                     return stove
-                stove.lock.release()
         return None

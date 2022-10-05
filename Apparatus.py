@@ -13,15 +13,15 @@ class Oven:
         self.is_available = True
         self.lock = threading.Lock()
 
-    def use(self, food):
-        threading.Thread(target=self.prepare_food, args=(food,)).start()
+    def use(self, food, food_idx):
+        threading.Thread(target=self.prepare_food, args=(food,food_idx)).start()
 
-    def prepare_food(self, food):
-        logger.warning(f'Oven {self.oven_id} preparing food {food.item_id}, order {food.order_id}')
+    def prepare_food(self, food, food_idx):
+        logger.warning(f'Oven {self.oven_id} preparing food {food_idx}, order {food.order_id}')
         time.sleep(food.preparation_time * TIME_UNIT / 1000)
-
         self.available()
-        logger.warning(f'Oven {self.oven_id} prepared food {food.item_id}, order {food.order_id}')
+        self.lock.release()
+        logger.warning(f'Oven {self.oven_id} prepared food {food_idx}, order {food.order_id}')
 
     def busy(self):
         self.is_available = False
@@ -36,15 +36,15 @@ class Stove:
         self.is_available = True
         self.lock = threading.Lock()
 
-    def use(self, food):
-        threading.Thread(target=self.prepare_food, args=(food,)).start()
+    def use(self, food, food_idx):
+        threading.Thread(target=self.prepare_food, args=(food,food_idx)).start()
 
-    def prepare_food(self, food):
-        logger.warning(f'Stove {self.stove_id} preparing food {food.item_id}, order {food.order_id}')
+    def prepare_food(self, food, food_idx):
+        logger.warning(f'Stove {self.stove_id} preparing food {food_idx}, order {food.order_id}')
         time.sleep(food.preparation_time * TIME_UNIT / 1000)
-
         self.available()
-        logger.warning(f'Stove {self.stove_id} prepared food {food.item_id}, order {food.order_id}')
+        self.lock.release()
+        logger.warning(f'Stove {self.stove_id} prepared food {food_idx}, order {food.order_id}')
 
     def busy(self):
         self.is_available = False

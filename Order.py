@@ -18,7 +18,6 @@ class Order:
         self.food_items = [Food(self.order_id, item_id, MENU[item_id-1]['preparation-time'],
                                 MENU[item_id-1]['complexity'], MENU[item_id-1]['cooking-apparatus'])
                            for item_id in self.items]
-        self.nr_foods_prepared = 0
 
     def is_finished(self):
         for food in self.food_items:
